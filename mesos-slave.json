@@ -1,0 +1,211 @@
+
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "Launches a Docker-based Mesos Slave cluster",
+
+  "Parameters" : {
+    "InstanceAmi" : {
+      "Description" : "Mesos AMI",
+      "Type" : "String"
+    },
+    "InstanceType" : {
+      "Description" : "EC2 instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : ["m1.small","m1.medium","m1.large","m1.xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","cc2.8xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","cr1.8xlarge","hi1.4xlarge","hs1.8xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","t1.micro","cg1.4xlarge","g2.2xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+    "KeyName" : {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type" : "String"
+    },
+    "ClusterId" : {
+      "Description" : "Mesos cluster ID",
+      "Type" : "String"
+    },
+    "ClusterSize" : {
+      "Description" : "Number of nodes to launch",
+      "Type" : "Number"
+    },
+    "ExhibitorDiscoveryUrl" : {
+      "Description" : "Exhibitor URL that returns active ZooKeeper nodes ('getCluster') (e.g., http://<exhibitor_node>/exhibitor/v1/cluster/list)",
+      "Type" : "String"
+    },
+    "ZkClientSecurityGroup" : {
+      "Description" : "Security group ID for ZK clients (should grant access to ZK nodes)",
+      "Type" : "String"
+    },
+    "MesosMasterSecurityGroup" : {
+      "Description" : "Security group ID of Mesos Master nodes",
+      "Type" : "String"
+    },
+    "AdminSecurityGroup" : {
+      "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
+      "Type": "String"
+    },
+    "Subnets" : {
+      "Description" : "List of VPC subnet IDs for the cluster",
+      "Type" : "CommaDelimitedList"
+    },
+    "VpcId" : {
+      "Description" : "VPC associated with the provided subnets",
+      "Type" : "String"
+    }
+  },
+
+  "Resources" : {
+    "IAMUser" : {
+      "Type" : "AWS::IAM::User",
+      "Properties" : {
+        "Policies" : [{
+          "PolicyName" : "IAMAccess",
+          "PolicyDocument" : {
+            "Statement" : [{
+              "Effect"    : "Allow",
+              "NotAction" : "iam:*",
+              "Resource"  : "*"
+            }]
+          }
+        }]
+      }
+    },
+
+    "HostKeys" : {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties" : {
+        "UserName" : { "Ref" : "IAMUser" }
+      }
+    },
+
+    "ServerGroup" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "AvailabilityZones" : { "Fn::GetAZs" : "" },
+        "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+        "MinSize" : "1",
+        "MaxSize" : "9",
+        "DesiredCapacity" : { "Ref" : "ClusterSize" },
+        "VPCZoneIdentifier" : { "Ref" : "Subnets" },
+        "Tags" : [
+          {
+            "Key" : "role",
+            "Value" : "mesos-slave",
+            "PropagateAtLaunch" : "true"
+          }
+        ]
+      }
+    },
+
+    "LaunchConfig" : {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata" : {
+        "AWS::CloudFormation::Init" : {
+          "config": {
+            "files" : {
+
+              "/usr/local/bin/zk-list-nodes" : {
+                "content" : { "Fn::Join" : ["", [
+                  "#!/bin/bash -e\n",
+                  "curl -s {{zk_discovery_url}} | python -c '",
+                    "import sys, json;",
+                    "j=json.load(sys.stdin);",
+                    "servers=[\":\".join([s, str(j[\"port\"])]) for s in j[\"servers\"]];",
+                    "print \",\".join(servers)'"
+                ]]},
+                "context" : {
+                  "zk_discovery_url"  : { "Ref" : "ExhibitorDiscoveryUrl" }
+                },
+                "mode"    : "000755",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              
+              "/usr/local/bin/configure-mesos-slave" : {
+                "content" : { "Fn::Join" : ["\n", [
+                  "#!/bin/bash -e",
+                  "echo \"zk://`zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-slave/env/MESOS_MASTER",
+                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME"
+                ]]},
+                "context" : {
+                  "mesos_cluster_id": { "Ref": "ClusterId" }
+                },
+                "mode"    : "000755",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+
+              "/etc/cron.d/mesos": {
+                "content" : { "Fn::Join" : ["\n", [
+                  "# Refresh mesos config every minute, but don't restart",
+                  "* * * * * root /usr/local/bin/configure-mesos-slave"
+                ]]},
+                "mode"    : "000644",
+                "owner"   : "root",
+                "group"   : "root"
+              }
+
+            }
+          }
+        }
+      },
+      "Properties" : {
+        "KeyName" : { "Ref" : "KeyName" },
+        "ImageId" : { "Ref" : "InstanceAmi" },
+        "SecurityGroups" : [ { "Ref" : "SecurityGroup" }, { "Ref" : "ZkClientSecurityGroup" }, { "Ref" : "AdminSecurityGroup" } ],
+        "AssociatePublicIpAddress": "true",
+        "InstanceType" : { "Ref" : "InstanceType" },
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -ex\n",
+
+          "# Helper function\n",
+          "function error_exit\n",
+          "{\n",
+          "  cfn-signal -e 1 -r \"$1\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "  exit 1\n",
+          "}\n",
+
+          "# Process CloudFormation init definitions\n",
+          "cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r LaunchConfig ",
+          "    --access-key ",  { "Ref" : "HostKeys" },
+          "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
+          "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
+          
+          "# Configure, enable, and start mesos-slave\n",
+          "configure-mesos-slave\n",
+          "runit-service enable mesos-slave\n",
+
+          "# All is well so signal success\n",
+          "cfn-signal -e 0 -r \"Stack setup complete\" '", { "Ref" : "WaitHandle" }, "'\n",
+
+          "#EOF"
+        ]]}}
+      }
+    },
+
+    "SecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable SSH, Mesos, and Marathon access",
+        "VpcId" : { "Ref" : "VpcId" },
+        "SecurityGroupIngress" :
+          [ { "IpProtocol" : "tcp", "FromPort" : "5051", "ToPort" : "5051", "SourceSecurityGroupId" : { "Ref" : "MesosMasterSecurityGroup"} } ]
+      }
+    },
+
+    "MesosMasterSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": { "Ref": "MesosMasterSecurityGroup" },
+        "IpProtocol": "-1",
+        "FromPort": "0",
+        "ToPort": "65535",
+        "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
+        }
+    },
+
+    "WaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    }
+  }
+}
