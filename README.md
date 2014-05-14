@@ -12,7 +12,7 @@ This project includes three templates:
 * `mesos-slave.json` - Launch a set of Mesos slaves in an auto scaling group
 * `mesos.json` - Creates both a `mesos-master` and `mesos-slave` stack from the corresponding templates.
 
-In general, you'll want to use launch the Mesos cluster via `mesos.json`.
+In general, you'll want to launch the Mesos cluster via `mesos.json`.
 
 Mesos servers are launched from public AMIs running Ubuntu 14.04 LTS and pre-loaded with Docker, Runit, and Mesos. If you wish to use your own image, simply modify `RegionMap` in `mesos.json`.
 
