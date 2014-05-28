@@ -69,7 +69,7 @@ aws s3 cp mesos-slave.json s3://mybucket/
 You'll need to pass the URLs for each as stack parameters. Note the URL should be formatted as `https://s3.amazonaws.com/<bucket>/<key>`, and the files do not need to be made public.
 
 ### 5. Launch the stack
-Launch the stack via the AWS console, a script, or [aws-cli](https://github.com/awscli/aws-cli)
+Launch the stack via the AWS console, a script, or [aws-cli](https://github.com/aws/aws-cli).
 
 See `mesos.json` for the full list of parameters, descriptions, and default values.
 
