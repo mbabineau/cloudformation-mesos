@@ -1,6 +1,6 @@
 CloudFormation templates for a [Mesos](http://mesos.apache.org) cluster running the [Marathon](https://github.com/mesosphere/marathon) framework.
 
-Pre-requisites:
+Prerequisites:
 * An Exhibitor-managed ZooKeeper cluster such as provided by [thefactory/cloudformation-zookeeper](https://github.com/thefactory/cloudformation-zookeeper). Specifically, you'll need:
     - An Exhibitor endpoint for ZK node discovery
     - A ZK client security group to associate with the Mesos nodes
