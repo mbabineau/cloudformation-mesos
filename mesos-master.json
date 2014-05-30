@@ -184,7 +184,7 @@
           "   -p 8080:8080",
           "   ", { "Ref": "MarathonDockerImage" },
           "     --master zk://`zk-list-nodes`/", { "Ref": "ClusterId" },
-          "     --zk zk://`zk-list-nodes`/marathon",
+          "     --zk zk://`zk-list-nodes`/", { "Ref": "ClusterId" }, "/marathon",
           "     --ha",
           "     --hostname `ec2metadata --public-hostname`'\n",
           "runit-service enable marathon\n",

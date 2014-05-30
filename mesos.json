@@ -137,7 +137,7 @@
         "TimeoutInMinutes" : "15",
         "Parameters" : {
           "InstanceAmi" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] },
-          "InstanceType" : { "Ref" : "MasterInstanceType" },
+          "InstanceType" : { "Ref" : "SlaveInstanceType" },
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
