@@ -180,7 +180,6 @@
           "docker pull ", { "Ref": "MarathonDockerImage" }, "\n",
           "runit-service create marathon 'docker -r=false run ",
           "   --net=host",
-          "   -h `ec2metadata --public-hostname`",
           "   -p 8080:8080",
           "   ", { "Ref": "MarathonDockerImage" },
           "     --master zk://`zk-list-nodes`/", { "Ref": "ClusterId" },
