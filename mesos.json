@@ -67,6 +67,11 @@
       "Type" : "String",
       "Default" : "thefactory/marathon:latest"
     },
+    "DockerCredentials" : {
+      "Description" : "JSON string to be saved as .dockercfg",
+      "Type" : "String",
+      "Default" : ""
+    },
 
     "MesosMasterTemplateUrl" : {
       "Description" : "URL of the Mesos Master CloudFormation template on S3 (must be \"https://s3.amazonaws.com/<bucket>/<key>\")",
@@ -120,6 +125,8 @@
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },
           "ClusterSize" : { "Ref" : "MasterInstanceCount" },
+          "DockerCredentials" : { "Ref" : "DockerCredentials" },
+          "MarathonDockerImage" : { "Ref" : "MarathonDockerImage" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
@@ -141,6 +148,7 @@
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
+          "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "MesosMasterSecurityGroup" : { "Fn::GetAtt" : [ "MesosMasterStack", "Outputs.MesosMasterSecurityGroup" ] },

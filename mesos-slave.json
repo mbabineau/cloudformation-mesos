@@ -40,6 +40,11 @@
       "Description" : "Security group ID of Mesos Master nodes",
       "Type" : "String"
     },
+    "DockerCredentials" : {
+      "Description" : "JSON string to be saved as .dockercfg",
+      "Type" : "String",
+      "Default" : ""
+    },
     "AdminSecurityGroup" : {
       "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
       "Type": "String"
@@ -141,6 +146,13 @@
                   "* * * * * root /usr/local/bin/configure-mesos-slave"
                 ]]},
                 "mode"    : "000644",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+
+              "/root/.dockercfg": {
+                "content" : { "Ref" : "DockerCredentials" },
+                "mode"    : "000600",
                 "owner"   : "root",
                 "group"   : "root"
               }

@@ -45,6 +45,11 @@
       "Type" : "String",
       "Default" : "thefactory/marathon:latest"
     },
+    "DockerCredentials" : {
+      "Description" : "JSON string to be saved as .dockercfg",
+      "Type" : "String",
+      "Default" : ""
+    },
     "Subnets" : {
       "Description" : "List of VPC subnet IDs for the cluster",
       "Type" : "CommaDelimitedList"
@@ -144,6 +149,13 @@
                 "mode"    : "000644",
                 "owner"   : "root",
                 "group"   : "root"
+              },
+
+              "/root/.dockercfg": {
+                "content" : { "Ref" : "DockerCredentials" },
+                "mode"    : "000644",
+                "owner"   : "root",
+                "group"   : "root"
               }
 
             }
@@ -177,6 +189,7 @@
           "runit-service enable mesos-master\n",
 
           "# Set up and start Marathon \n",
+          "export HOME=/root/  # so Docker can find ~/.dockercfg\n",
           "docker pull ", { "Ref": "MarathonDockerImage" }, "\n",
           "runit-service create marathon 'docker -r=false run ",
           "   --net=host",
