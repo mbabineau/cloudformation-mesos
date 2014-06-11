@@ -197,6 +197,7 @@
           "   ", { "Ref": "MarathonDockerImage" },
           "     --master zk://`zk-list-nodes`/", { "Ref": "ClusterId" },
           "     --zk zk://`zk-list-nodes`/", { "Ref": "ClusterId" }, "_marathon",
+          "     --event_subscriber http_callback",
           "     --ha",
           "     --hostname `ec2metadata --public-hostname`'\n",
           "runit-service enable marathon\n",
