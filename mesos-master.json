@@ -45,6 +45,16 @@
       "Type" : "String",
       "Default" : "thefactory/marathon:latest"
     },
+    "MarathonLoggerDockerImage" : {
+      "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
+      "Type" : "String",
+      "Default" : "thefactory/marathon-logger:latest"
+    },
+    "MarathonLoggerEventStore" : {
+      "Description" : "The marathon-logger event store connection string",
+      "Type" : "String",
+      "Default" : "in-memory://localhost/?max_length=100"
+    },
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
       "Type" : "String",
@@ -201,6 +211,17 @@
           "     --ha",
           "     --hostname `ec2metadata --public-hostname`'\n",
           "runit-service enable marathon\n",
+
+          "# Set up and run marathon-logger\n",
+          "docker pull ", { "Ref": "MarathonLoggerDockerImage" }, "\n",
+          "runit-service create marathon-logger 'docker -r=false run ",
+          "   --net=host",
+          "   -p 5000:5000",
+          "   ", { "Ref": "MarathonLoggerDockerImage" },
+          "     --marathon-url http://localhost:8080/",
+          "     --callback-url http://localhost:5000/events",
+          "     --event-store ", { "Ref": "MarathonLoggerEventStore" }, "'\n",
+          "runit-service enable marathon-logger\n",
 
           "# All is well so signal success\n",
           "cfn-signal -e 0 -r \"Stack setup complete\" '", { "Ref" : "WaitHandle" }, "'\n",
