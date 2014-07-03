@@ -62,15 +62,25 @@
       "Default" : "1"
     },
 
+    "DockerCredentials" : {
+      "Description" : "JSON string to be saved as .dockercfg",
+      "Type" : "String",
+      "Default" : ""
+    },
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
       "Default" : "thefactory/marathon:latest"
     },
-    "DockerCredentials" : {
-      "Description" : "JSON string to be saved as .dockercfg",
+    "MarathonLoggerDockerImage" : {
+      "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "thefactory/marathon-logger:latest"
+    },
+    "MarathonLoggerEventStore" : {
+      "Description" : "The marathon-logger event store connection string",
+      "Type" : "String",
+      "Default" : "in-memory://localhost/?max_length=100"
     },
 
     "MesosMasterTemplateUrl" : {
@@ -127,6 +137,8 @@
           "ClusterSize" : { "Ref" : "MasterInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "MarathonDockerImage" : { "Ref" : "MarathonDockerImage" },
+          "MarathonLoggerDockerImage" : { "Ref" : "MarathonLoggerDockerImage" },
+          "MarathonLoggerEventStore" : { "Ref" : "MarathonLoggerEventStore" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
