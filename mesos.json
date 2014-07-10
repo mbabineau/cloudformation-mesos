@@ -48,6 +48,16 @@
       "Type" : "Number",
       "Default" : "1"
     },
+    "MasterQuorumCount" : {
+      "Description" : "Number of masters needed for Mesos replicated log registry quorum (should be ceiling(<MasterInstanceCount>/2))",
+      "Type" : "Number",
+      "Default" : "1"
+    },
+    "MasterLogstashConfig" : {
+      "Description" : "(optional) Config string for Logstash on the Mesos Masters",
+      "Type" : "String",
+      "Default" : ""
+    },
 
     "SlaveInstanceType" : {
       "Description" : "EC2 instance type",
@@ -60,6 +70,11 @@
       "Description" : "Number of slave nodes to launch",
       "Type" : "Number",
       "Default" : "1"
+    },
+    "SlaveLogstashConfig" : {
+      "Description" : "(optional) Config string for Logstash on the Mesos Slaves (to read task logs, you can use 'input { file { path => \"/tmp/mesos/slaves/*/frameworks/*/executors/*/runs/latest/stdout\" }')",
+      "Type" : "String",
+      "Default" : ""
     },
 
     "DockerCredentials" : {
@@ -97,28 +112,28 @@
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-f2a4569a"
+        "AMI" : "ami-c062a2a8"
       },
       "us-west-1" : {
-        "AMI" : "ami-4c121509"
+        "AMI" : "ami-6b2e2e2e"
       },
       "us-west-2" : {
-        "AMI" : "ami-599eec69"
+        "AMI" : "ami-2b89f71b"
       },
       "eu-west-1" : {
-        "AMI" : "ami-cfa866b8"
+        "AMI" : "ami-8710c4f0"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-6a96ca38"
+        "AMI" : "ami-08e5bb5a"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-f592f7cf"
+        "AMI" : "ami-f34324c9"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-9d327c9c"
+        "AMI" : "ami-05e0b604"
       },
       "sa-east-1" : {
-        "AMI" : "ami-9f18b482"
+        "AMI" : "ami-536dc34e"
       }
     }
   },
@@ -135,7 +150,9 @@
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },
           "ClusterSize" : { "Ref" : "MasterInstanceCount" },
+          "QuorumSize" : { "Ref" : "MasterQuorumCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
+          "LogstashConfig" : { "Ref" : "MasterLogstashConfig" },
           "MarathonDockerImage" : { "Ref" : "MarathonDockerImage" },
           "MarathonLoggerDockerImage" : { "Ref" : "MarathonLoggerDockerImage" },
           "MarathonLoggerEventStore" : { "Ref" : "MarathonLoggerEventStore" },
@@ -161,6 +178,7 @@
           "ClusterId" : { "Ref" : "ClusterId" },
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
+          "LogstashConfig" : { "Ref" : "SlaveLogstashConfig" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "MesosMasterSecurityGroup" : { "Fn::GetAtt" : [ "MesosMasterStack", "Outputs.MesosMasterSecurityGroup" ] },

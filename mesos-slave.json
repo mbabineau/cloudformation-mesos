@@ -45,6 +45,11 @@
       "Type" : "String",
       "Default" : ""
     },
+    "LogstashConfig" : {
+      "Description" : "(optional) Config string for Logstash (to read task logs, you can use 'input { file { path => \"/tmp/mesos/slaves/*/frameworks/*/executors/*/runs/latest/stdout\" }')",
+      "Type" : "String",
+      "Default" : ""
+    },
     "AdminSecurityGroup" : {
       "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
       "Type": "String"
@@ -57,6 +62,10 @@
       "Description" : "VPC associated with the provided subnets",
       "Type" : "String"
     }
+  },
+
+  "Conditions" : {
+    "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] }
   },
 
   "Resources" : {
@@ -182,6 +191,17 @@
           "    --access-key ",  { "Ref" : "HostKeys" },
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
+
+          { "Fn::If" : [
+            "EnableLogstashCondition",
+            { "Fn::Join" : ["", [
+              "echo '", { "Ref" : "LogstashConfig" },"' > /opt/logstash/logstash.conf\n",
+              "runit-service create logstash '/opt/logstash/bin/logstash -f /opt/logstash/logstash.conf'\n",
+              "echo '/root' > /etc/sv/logstash/env/HOME\n",
+              "runit-service enable logstash\n"
+            ]]},
+            ""
+          ]},
           
           "# Configure, enable, and start mesos-slave\n",
           "configure-mesos-slave\n",

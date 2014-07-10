@@ -28,6 +28,10 @@
       "Description" : "Number of nodes to launch",
       "Type" : "Number"
     },
+    "QuorumSize" : {
+      "Description" : "Number of masters needed for Mesos replicated log registry quorum (should be ceiling(<ClusterSize>/2))",
+      "Type" : "Number"
+    },
     "ExhibitorDiscoveryUrl" : {
       "Description" : "Exhibitor URL that returns active ZooKeeper nodes ('getCluster') (e.g., http://<exhibitor_node>/exhibitor/v1/cluster/list)",
       "Type" : "String"
@@ -60,6 +64,11 @@
       "Type" : "String",
       "Default" : ""
     },
+    "LogstashConfig" : {
+      "Description" : "(optional) Config string for Logstash",
+      "Type" : "String",
+      "Default" : ""
+    },
     "Subnets" : {
       "Description" : "List of VPC subnet IDs for the cluster",
       "Type" : "CommaDelimitedList"
@@ -68,6 +77,10 @@
       "Description" : "VPC associated with the provided subnets",
       "Type" : "String"
     }
+  },
+
+  "Conditions" : {
+    "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] }
   },
 
   "Resources" : {
@@ -141,10 +154,12 @@
                 "content" : { "Fn::Join" : ["\n", [
                   "#!/bin/bash -e",
                   "echo \"zk://`zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-master/env/MESOS_ZK",
-                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-master/env/MESOS_HOSTNAME"
+                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-master/env/MESOS_HOSTNAME",
+                  "echo \"{{mesos_quorum}}\" > /etc/sv/mesos-master/env/MESOS_QUORUM"
                 ]]},
                 "context" : {
-                  "mesos_cluster_id": { "Ref": "ClusterId" }
+                  "mesos_cluster_id": { "Ref": "ClusterId" },
+                  "mesos_quorum": { "Ref": "QuorumSize" }
                 },
                 "mode"    : "000755",
                 "owner"   : "root",
@@ -194,6 +209,17 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
+          { "Fn::If" : [
+            "EnableLogstashCondition",
+            { "Fn::Join" : ["", [
+              "echo '", { "Ref" : "LogstashConfig" },"' > /opt/logstash/logstash.conf\n",
+              "runit-service create logstash '/opt/logstash/bin/logstash -f /opt/logstash/logstash.conf'\n",
+              "echo '/root' > /etc/sv/logstash/HOME\n",
+              "runit-service enable logstash\n"
+            ]]},
+            ""
+          ]},
+
           "# Configure, enable, and start mesos-master\n",
           "configure-mesos-master\n",
           "runit-service enable mesos-master\n",
@@ -210,6 +236,7 @@
           "     --event_subscriber http_callback",
           "     --ha",
           "     --hostname `ec2metadata --public-hostname`'\n",
+
           "runit-service enable marathon\n",
 
           "# Set up and run marathon-logger\n",
