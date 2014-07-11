@@ -43,7 +43,7 @@
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "{}"
     },
     "LogstashConfig" : {
       "Description" : "(optional) Config string for Logstash (to read task logs, you can use 'input { file { path => \"/tmp/mesos/slaves/*/frameworks/*/executors/*/runs/latest/stdout\" }')",

@@ -62,7 +62,7 @@
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "{}"
     },
     "LogstashConfig" : {
       "Description" : "(optional) Config string for Logstash",
