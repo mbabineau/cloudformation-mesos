@@ -164,8 +164,37 @@
                 "mode"    : "000600",
                 "owner"   : "root",
                 "group"   : "root"
-              }
+              },
 
+              "/etc/deimos.cfg": {
+                "content" : { "Fn::Join" : ["\n", [
+                  "[docker.index]",
+                  "account_libmesos: libmesos",
+                  "dockercfg: /root/.dockercfg",
+
+                  "[containers.options]",
+                  "default: []",
+                  "append: []",
+                  "ignore: false",
+
+                  "[containers.image]",
+                  "default: docker:///ubuntu",
+                  "ignore: false",
+
+                  "[uris]",
+                  "unpack: True",
+
+                  "[log]",
+                  "syslog:  INFO",
+                  "console: DEBUG",
+
+                  "[state]",
+                  "root: /tmp/deimos"
+                ]]},
+                "mode"    : "000644",
+                "owner"   : "root",
+                "group"   : "root"
+              }
             }
           }
         }
