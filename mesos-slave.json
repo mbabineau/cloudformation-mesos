@@ -28,6 +28,13 @@
       "Description" : "Number of nodes to launch",
       "Type" : "Number"
     },
+    "EnableDeimos" : {
+      "Description" : "Use Deimos as external containerizer on slaves",
+      "Type" : "String",
+      "Default" : "False",
+      "AllowedValues" : ["True", "False"],
+      "ConstraintDescription" : "Boolean (True | False)"
+    },
     "ExhibitorDiscoveryUrl" : {
       "Description" : "Exhibitor URL that returns active ZooKeeper nodes ('getCluster') (e.g., http://<exhibitor_node>/exhibitor/v1/cluster/list)",
       "Type" : "String"
@@ -65,7 +72,8 @@
   },
 
   "Conditions" : {
-    "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] }
+    "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
+    "EnableDeimosCondition" : { "Fn::Equals" : [{ "Ref" : "EnableDeimos" }, "True"] }
   },
 
   "Resources" : {
@@ -228,6 +236,15 @@
               "runit-service create logstash '/opt/logstash/bin/logstash -f /opt/logstash/logstash.conf'\n",
               "echo '/root' > /etc/sv/logstash/env/HOME\n",
               "runit-service enable logstash\n"
+            ]]},
+            ""
+          ]},
+
+          { "Fn::If" : [
+            "EnableDeimosCondition",
+            { "Fn::Join" : ["", [
+              "echo '/usr/local/bin/deimos' > /etc/sv/mesos-slave/env/MESOS_CONTAINERIZER_PATH\n",
+              "echo 'external' > /etc/sv/mesos-slave/env/MESOS_ISOLATION\n"
             ]]},
             ""
           ]},
