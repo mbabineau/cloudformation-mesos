@@ -78,6 +78,7 @@ Example using `aws-cli`:
 aws cloudformation create-stack \
     --template-body file://mesos.json \
     --stack-name <stack> \
+    --capabilities CAPABILITY_IAM \
     --parameters \
         ParameterKey=KeyName,ParameterValue=<key> \
         ParameterKey=ExhibitorDiscoveryUrl,ParameterValue=<url> \
