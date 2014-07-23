@@ -62,18 +62,24 @@
       "Type": "String"
     },
     "Subnets" : {
-      "Description" : "List of VPC subnet IDs for the cluster",
+      "Description" : "List of VPC subnet IDs for the cluster. Must match the passed AvailabilityZones.",
       "Type" : "CommaDelimitedList"
     },
     "VpcId" : {
       "Description" : "VPC associated with the provided subnets",
       "Type" : "String"
+    },
+    "AvailabilityZones": {
+      "Description" : "(Optional) If passed, only launch nodes in these AZs (e.g., 'us-east-1a,us-east-1b'). Must match the passed Subnets.",
+      "Type" : "CommaDelimitedList",
+      "Default" : ""
     }
   },
 
   "Conditions" : {
     "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
-    "EnableDeimosCondition" : { "Fn::Equals" : [{ "Ref" : "EnableDeimos" }, "True"] }
+    "EnableDeimosCondition" : { "Fn::Equals" : [{ "Ref" : "EnableDeimos" }, "True"] },
+    "UseAllAvailabilityZones" : {"Fn::Equals" : [{ "Fn::Join" : ["", {"Ref" : "AvailabilityZones"} ]}, ""]}
   },
 
   "Resources" : {
@@ -103,7 +109,13 @@
     "ServerGroup" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "Properties" : {
-        "AvailabilityZones" : { "Fn::GetAZs" : "" },
+        "AvailabilityZones" : {
+          "Fn::If" : [
+            "UseAllAvailabilityZones",
+            { "Fn::GetAZs": "" },
+            {"Ref" : "AvailabilityZones"}
+          ]
+        },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
         "MinSize" : "1",
         "MaxSize" : "9",

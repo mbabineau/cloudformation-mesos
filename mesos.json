@@ -15,12 +15,17 @@
       "Type" : "String"
     },
     "Subnets" : {
-      "Description" : "List of VPC subnet IDs in which to launch the cluster",
+      "Description" : "List of VPC subnet IDs in which to launch the cluster. Must match the passed AvailabilityZones.",
       "Type" : "String"
     },
     "VpcId" : {
       "Description" : "VPC associated with the provided subnets",
       "Type" : "String"
+    },
+    "AvailabilityZones": {
+      "Description" : "(Optional) If passed, only launch nodes in these AZs (e.g., 'us-east-1a,us-east-1b'). Must match the passed Subnets.",
+      "Type" : "String",
+      "Default" : ""
     },
 
     "AdminSecurityGroup" : {
@@ -167,7 +172,8 @@
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
           "Subnets" : { "Ref" : "Subnets" },
-          "VpcId" : { "Ref" : "VpcId" }
+          "VpcId" : { "Ref" : "VpcId" },
+          "AvailabilityZones" : { "Ref" : "AvailabilityZones" }
         }
       }
     },
@@ -192,7 +198,8 @@
           "MesosMasterSecurityGroup" : { "Fn::GetAtt" : [ "MesosMasterStack", "Outputs.MesosMasterSecurityGroup" ] },
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
           "Subnets" : { "Ref" : "Subnets" },
-          "VpcId" : { "Ref" : "VpcId" }
+          "VpcId" : { "Ref" : "VpcId" },
+          "AvailabilityZones" : { "Ref" : "AvailabilityZones" }
         }
       }
     }
