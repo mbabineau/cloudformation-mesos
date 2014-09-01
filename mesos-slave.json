@@ -172,7 +172,8 @@
               "/etc/cron.d/mesos": {
                 "content" : { "Fn::Join" : ["\n", [
                   "# Refresh mesos config every minute, but don't restart",
-                  "* * * * * root /usr/local/bin/configure-mesos-slave"
+                  "* * * * * root /usr/local/bin/configure-mesos-slave",
+                  ""
                 ]]},
                 "mode"    : "000644",
                 "owner"   : "root",
