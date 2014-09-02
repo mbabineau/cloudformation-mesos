@@ -92,7 +92,7 @@
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "{}"
     },
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
