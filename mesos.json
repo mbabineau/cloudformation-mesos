@@ -81,13 +81,6 @@
       "Type" : "String",
       "Default" : ""
     },
-    "EnableDeimos" : {
-      "Description" : "Use Deimos as external containerizer on slaves",
-      "Type" : "String",
-      "Default" : "False",
-      "AllowedValues" : ["True", "False"],
-      "ConstraintDescription" : "Boolean (True | False)"
-    },
 
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
@@ -97,7 +90,7 @@
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : "thefactory/marathon:0.6.1"
+      "Default" : "thefactory/marathon:latest"
     },
     "MarathonLoggerDockerImage" : {
       "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
@@ -124,28 +117,28 @@
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-a8ca06c0"
+        "AMI" : "ami-d075d3b8"
       },
       "us-west-1" : {
-        "AMI" : "ami-895152cc"
+        "AMI" : "ami-41707e04"
       },
       "us-west-2" : {
-        "AMI" : "ami-2ba3da1b"
+        "AMI" : "ami-5d591f6d"
       },
       "eu-west-1" : {
-        "AMI" : "ami-ab9345dc"
+        "AMI" : "ami-9433e8e3"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-2284dd70"
+        "AMI" : "ami-1a351048"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-6596f15f"
+        "AMI" : "ami-cd7313f7"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-711b4870"
+        "AMI" : "ami-87173786"
       },
       "sa-east-1" : {
-        "AMI" : "ami-d10ba5cc"
+        "AMI" : "ami-a57fd4b8"
       }
     }
   },
@@ -193,7 +186,6 @@
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "SlaveLogstashConfig" },
-          "EnableDeimos" : { "Ref" : "EnableDeimos" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "MesosMasterSecurityGroup" : { "Fn::GetAtt" : [ "MesosMasterStack", "Outputs.MesosMasterSecurityGroup" ] },

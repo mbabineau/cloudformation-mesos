@@ -28,13 +28,6 @@
       "Description" : "Number of nodes to launch",
       "Type" : "Number"
     },
-    "EnableDeimos" : {
-      "Description" : "Use Deimos as external containerizer on slaves",
-      "Type" : "String",
-      "Default" : "False",
-      "AllowedValues" : ["True", "False"],
-      "ConstraintDescription" : "Boolean (True | False)"
-    },
     "ExhibitorDiscoveryUrl" : {
       "Description" : "Exhibitor URL that returns active ZooKeeper nodes ('getCluster') (e.g., http://<exhibitor_node>/exhibitor/v1/cluster/list)",
       "Type" : "String"
@@ -159,10 +152,12 @@
                 "content" : { "Fn::Join" : ["\n", [
                   "#!/bin/bash -e",
                   "echo \"zk://`zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-slave/env/MESOS_MASTER",
-                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME"
+                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME",
+                  "echo \"{{executor_registration_timeout}}\" > /etc/sv/mesos-slave/env/MESOS_EXECUTOR_REGISTRATION_TIMEOUT"
                 ]]},
                 "context" : {
-                  "mesos_cluster_id": { "Ref": "ClusterId" }
+                  "mesos_cluster_id": { "Ref": "ClusterId" },
+                  "executor_registration_timeout": "5mins"
                 },
                 "mode"    : "000755",
                 "owner"   : "root",
@@ -183,36 +178,6 @@
               "/root/.dockercfg": {
                 "content" : { "Ref" : "DockerCredentials" },
                 "mode"    : "000600",
-                "owner"   : "root",
-                "group"   : "root"
-              },
-
-              "/etc/deimos.cfg": {
-                "content" : { "Fn::Join" : ["\n", [
-                  "[docker.index]",
-                  "account_libmesos: libmesos",
-                  "dockercfg: /root/.dockercfg",
-
-                  "[containers.options]",
-                  "default: []",
-                  "append: []",
-                  "ignore: false",
-
-                  "[containers.image]",
-                  "default: docker:///ubuntu",
-                  "ignore: false",
-
-                  "[uris]",
-                  "unpack: True",
-
-                  "[log]",
-                  "syslog:  INFO",
-                  "console: DEBUG",
-
-                  "[state]",
-                  "root: /tmp/deimos"
-                ]]},
-                "mode"    : "000644",
                 "owner"   : "root",
                 "group"   : "root"
               }

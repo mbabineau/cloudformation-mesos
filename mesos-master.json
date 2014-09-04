@@ -47,7 +47,7 @@
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : "thefactory/marathon:0.6.1"
+      "Default" : "thefactory/marathon:latest"
     },
     "MarathonLoggerDockerImage" : {
       "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
@@ -181,7 +181,8 @@
               "/etc/cron.d/mesos": {
                 "content" : { "Fn::Join" : ["\n", [
                   "# Refresh mesos config every minute, but don't restart",
-                  "* * * * * root /usr/local/bin/configure-mesos-master"
+                  "* * * * * root /usr/local/bin/configure-mesos-master",
+                  ""
                 ]]},
                 "mode"    : "000644",
                 "owner"   : "root",
