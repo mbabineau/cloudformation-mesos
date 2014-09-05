@@ -71,7 +71,6 @@
 
   "Conditions" : {
     "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
-    "EnableDeimosCondition" : { "Fn::Equals" : [{ "Ref" : "EnableDeimos" }, "True"] },
     "UseAllAvailabilityZones" : {"Fn::Equals" : [{ "Fn::Join" : ["", {"Ref" : "AvailabilityZones"} ]}, ""]}
   },
 
@@ -214,15 +213,6 @@
               "runit-service create logstash '/opt/logstash/bin/logstash -f /opt/logstash/logstash.conf'\n",
               "echo '/root' > /etc/sv/logstash/env/HOME\n",
               "runit-service enable logstash\n"
-            ]]},
-            ""
-          ]},
-
-          { "Fn::If" : [
-            "EnableDeimosCondition",
-            { "Fn::Join" : ["", [
-              "echo '/usr/local/bin/deimos' > /etc/sv/mesos-slave/env/MESOS_CONTAINERIZER_PATH\n",
-              "echo 'external' > /etc/sv/mesos-slave/env/MESOS_ISOLATION\n"
             ]]},
             ""
           ]},
