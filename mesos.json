@@ -90,7 +90,7 @@
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : "thefactory/marathon:latest"
+      "Default" : "thefactory/marathon:0.7.0"
     },
     "MarathonLoggerDockerImage" : {
       "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
@@ -117,28 +117,28 @@
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-d075d3b8"
+        "AMI" : "ami-040abf6c"
       },
       "us-west-1" : {
-        "AMI" : "ami-41707e04"
+        "AMI" : "ami-91e2ead4"
       },
       "us-west-2" : {
-        "AMI" : "ami-5d591f6d"
+        "AMI" : "ami-55b1f265"
       },
       "eu-west-1" : {
-        "AMI" : "ami-9433e8e3"
+        "AMI" : "ami-94d273e3"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-1a351048"
+        "AMI" : "ami-5a7f5808"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-cd7313f7"
+        "AMI" : "ami-33c0a309"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-87173786"
+        "AMI" : "ami-75d1f874"
       },
       "sa-east-1" : {
-        "AMI" : "ami-a57fd4b8"
+        "AMI" : "ami-3f0fa522"
       }
     }
   },
