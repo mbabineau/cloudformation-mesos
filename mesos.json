@@ -11,7 +11,7 @@
       "Default" : "mesos"
     },
     "KeyName" : {
-      "Description" : "Existing EC2 KeyPair to be associated with all cluster instances for SSH access",
+      "Description" : "Existing EC2 KeyPair to be associated with all cluster instances for SSH access. For default AMIs, log in with the 'ubuntu' user.",
       "Type" : "String"
     },
     "Subnets" : {
