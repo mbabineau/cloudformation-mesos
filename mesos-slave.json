@@ -150,8 +150,8 @@
               "/usr/local/bin/configure-mesos-slave" : {
                 "content" : { "Fn::Join" : ["\n", [
                   "#!/bin/bash -e",
-                  "echo \"zk://`zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-slave/env/MESOS_MASTER",
-                  "echo \"`ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME",
+                  "echo \"zk://`/usr/local/bin/zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-slave/env/MESOS_MASTER",
+                  "echo \"`/usr/bin/ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME",
                   "echo \"{{executor_registration_timeout}}\" > /etc/sv/mesos-slave/env/MESOS_EXECUTOR_REGISTRATION_TIMEOUT"
                 ]]},
                 "context" : {
