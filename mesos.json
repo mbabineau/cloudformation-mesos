@@ -11,7 +11,7 @@
       "Default" : "mesos"
     },
     "KeyName" : {
-      "Description" : "Existing EC2 KeyPair to be associated with all cluster instances for SSH access. For default AMIs, log in with the 'ubuntu' user.",
+      "Description" : "Existing EC2 KeyPair to be associated with all cluster instances for SSH access. For default AMIs, log in as the 'ubuntu' user.",
       "Type" : "String"
     },
     "Subnets" : {
@@ -81,6 +81,11 @@
       "Type" : "String",
       "Default" : ""
     },
+    "SlaveResources" : {
+      "Description" : "(optional) Resources to allocate to Mesos (as passed to --resources). To expose ports 8000-9000, for instance, you can use 'ports(*):[8000-9000, 31000-32000]'",
+      "Type" : "String",
+      "Default" : ""
+    },
 
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
@@ -90,7 +95,7 @@
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : "thefactory/marathon:0.7.0"
+      "Default" : "thefactory/marathon:0.7.1"
     },
     "MarathonLoggerDockerImage" : {
       "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
@@ -186,6 +191,7 @@
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "SlaveLogstashConfig" },
+          "MesosResources" : { "Ref" : "SlaveResources" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
           "MesosMasterSecurityGroup" : { "Fn::GetAtt" : [ "MesosMasterStack", "Outputs.MesosMasterSecurityGroup" ] },

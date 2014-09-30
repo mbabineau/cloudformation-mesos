@@ -50,6 +50,11 @@
       "Type" : "String",
       "Default" : ""
     },
+    "MesosResources" : {
+      "Description" : "(optional) Resources to allocate to Mesos (as passed to --resources). To expose ports 8000-9000, for instance, you can use 'ports(*):[8000-9000, 31000-32000]'",
+      "Type" : "String",
+      "Default" : ""
+    },
     "AdminSecurityGroup" : {
       "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
       "Type": "String"
@@ -152,11 +157,13 @@
                   "#!/bin/bash -e",
                   "echo \"zk://`/usr/local/bin/zk-list-nodes`/{{mesos_cluster_id}}\" > /etc/sv/mesos-slave/env/MESOS_MASTER",
                   "echo \"`/usr/bin/ec2metadata --public-hostname`\" > /etc/sv/mesos-slave/env/MESOS_HOSTNAME",
-                  "echo \"{{executor_registration_timeout}}\" > /etc/sv/mesos-slave/env/MESOS_EXECUTOR_REGISTRATION_TIMEOUT"
+                  "echo \"{{executor_registration_timeout}}\" > /etc/sv/mesos-slave/env/MESOS_EXECUTOR_REGISTRATION_TIMEOUT",
+                  "echo \"{{resources}}\" > /etc/sv/mesos-slave/env/MESOS_RESOURCES", ""
                 ]]},
                 "context" : {
                   "mesos_cluster_id": { "Ref": "ClusterId" },
-                  "executor_registration_timeout": "5mins"
+                  "executor_registration_timeout": "5mins",
+                  "resources": { "Ref": "MesosResources" }
                 },
                 "mode"    : "000755",
                 "owner"   : "root",
