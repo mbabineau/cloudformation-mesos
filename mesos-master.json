@@ -124,8 +124,8 @@
           ]
         },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
-        "MinSize" : "1",
-        "MaxSize" : "9",
+        "MinSize" : { "Ref" : "ClusterSize" },
+        "MaxSize" : { "Ref" : "ClusterSize" },
         "DesiredCapacity" : { "Ref" : "ClusterSize" },
         "VPCZoneIdentifier" : { "Ref" : "Subnets" },
         "Tags" : [
