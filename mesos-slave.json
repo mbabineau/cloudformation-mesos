@@ -186,7 +186,15 @@
                 "mode"    : "000600",
                 "owner"   : "root",
                 "group"   : "root"
+              },
+
+              "/etc/default/docker": {
+                "content" : "DOCKER_OPTS=\"-g $(readlink -f /var/lib/docker)\"\n",
+                "mode"    : "000644",
+                "owner"   : "root",
+                "group"   : "root"
               }
+
             }
           }
         }
@@ -212,6 +220,16 @@
           "    --access-key ",  { "Ref" : "HostKeys" },
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
+
+          "# Move docker dir to bigger device\n",
+          "service docker stop\n",
+          "mv /var/lib/docker /mnt/docker\n",
+          "ln -s /mnt/docker /var/lib/docker\n",
+          "service docker start\n",
+
+          "# Move Mesos workdir to bigger device\n",
+          "mkdir /mnt/mesos\n",
+          "ln -s /mnt/mesos /tmp/mesos\n",
 
           { "Fn::If" : [
             "EnableLogstashCondition",
