@@ -28,7 +28,7 @@ Note that this template must be used with Amazon VPC. New AWS accounts automatic
 
 ### 1. Clone the repository
 ```bash
-git clone git@github.com:thefactory/cloudformation-mesos.git
+git clone git@github.com:mbabineau/cloudformation-mesos.git
 ```
 
 ### 2. Create an Admin security group
