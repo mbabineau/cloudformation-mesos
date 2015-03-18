@@ -44,9 +44,15 @@
     "MasterInstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
-      "Default" : "m1.small",
-      "AllowedValues" : ["m1.small","m1.medium","m1.large","m1.xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","cc2.8xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","cr1.8xlarge","hi1.4xlarge","hs1.8xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","t1.micro","cg1.4xlarge","g2.2xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
+      "Default" : "t2.micro",
+      "AllowedValues" : [
+        "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge",
+        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hs1.8xlarge",
+        "g2.2xlarge"
+      ],
+      "ConstraintDescription" : "must be a valid, HVM-compatible EC2 instance type."
     },
     "MasterInstanceCount" : {
       "Description" : "Number of master nodes to launch",
@@ -67,9 +73,15 @@
     "SlaveInstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
-      "Default" : "m1.small",
-      "AllowedValues" : ["m1.small","m1.medium","m1.large","m1.xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","cc2.8xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","cr1.8xlarge","hi1.4xlarge","hs1.8xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","t1.micro","cg1.4xlarge","g2.2xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
+      "Default" : "t2.micro",
+      "AllowedValues" : [
+        "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge",
+        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hs1.8xlarge",
+        "g2.2xlarge"
+      ],
+      "ConstraintDescription" : "must be a valid, HVM-compatible EC2 instance type."
     },
     "SlaveInstanceCount" : {
       "Description" : "Number of slave nodes to launch",
@@ -122,28 +134,28 @@
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-744dff1c"
+        "AMI" : "ami-aeb598c6"
       },
       "us-west-1" : {
-        "AMI" : "ami-efbdb6aa"
+        "AMI" : "ami-5b18fe1f"
       },
       "us-west-2" : {
-        "AMI" : "ami-db672aeb"
+        "AMI" : "ami-2b3e121b"
       },
       "eu-west-1" : {
-        "AMI" : "ami-46cd6f31"
+        "AMI" : "ami-1d31ae6a"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-227d5b70"
+        "AMI" : "ami-40c5f412"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-0798fa3d"
+        "AMI" : "ami-a781f19d"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-c70b3ec6"
+        "AMI" : "ami-fb3fc8fb"
       },
       "sa-east-1" : {
-        "AMI" : "ami-a15feabc"
+        "AMI" : "ami-812d959c"
       }
     }
   },
