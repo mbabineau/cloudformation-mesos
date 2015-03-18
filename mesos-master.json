@@ -81,6 +81,12 @@
       "Description" : "(Optional) If passed, only launch nodes in these AZs (e.g., 'us-east-1a,us-east-1b'). Must match the passed Subnets.",
       "Type" : "CommaDelimitedList",
       "Default" : ""
+    },
+
+    "StackCreationTimeout" : {
+      "Description" : "Timeout on initial stack creation",
+      "Type" : "String",
+      "Default": "PT10M"
     }
   },
 
@@ -135,6 +141,11 @@
             "PropagateAtLaunch" : "true"
           }
         ]
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : { "Ref" : "StackCreationTimeout" }
+        }
       }
     },
 
@@ -210,7 +221,7 @@
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
         "ImageId" : { "Ref" : "InstanceAmi" },
-        "SecurityGroups" : [ { "Ref" : "SecurityGroup" }, { "Ref" : "ZkClientSecurityGroup" }, { "Ref" : "AdminSecurityGroup" } ],
+        "SecurityGroups" : [ { "Ref" : "MasterSecurityGroup" }, { "Ref" : "ZkClientSecurityGroup" }, { "Ref" : "AdminSecurityGroup" } ],
         "AssociatePublicIpAddress" : "true",
         "InstanceType" : { "Ref" : "InstanceType" },
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -219,7 +230,10 @@
           "# Helper function\n",
           "function error_exit\n",
           "{\n",
-          "  cfn-signal -e 1 -r \"$1\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "  cfn-signal -e 1 -r \"$1\" ",
+              " --resource ServerGroup",
+              " --stack ", { "Ref" : "AWS::StackName" },
+              " --region ", { "Ref" : "AWS::Region" }, "\n",
           "  exit 1\n",
           "}\n",        
 
@@ -277,40 +291,83 @@
           "runit-service enable marathon-logger\n",
 
           "# All is well so signal success\n",
-          "cfn-signal -e 0 -r \"Stack setup complete\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "cfn-signal -e 0 -r \"Stack setup complete\" ",
+              " --resource ServerGroup",
+              " --stack ", { "Ref" : "AWS::StackName" },
+              " --region ", { "Ref" : "AWS::Region" }, "\n",
 
           "#EOF"
         ]]}}
       }
     },
 
-    "SecurityGroup" : {
+    "MasterSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-        "GroupDescription" : "Enable SSH, Mesos, and Marathon access",
+        "GroupDescription" : "Mesos Masters",
+        "VpcId" : { "Ref" : "VpcId" },
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "5050", "ToPort" : "5050", "SourceSecurityGroupId" : { "Ref" : "LbSecurityGroup"} },
+          { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "SourceSecurityGroupId" : { "Ref" : "LbSecurityGroup"} }
+        ]
+      }
+    },
+
+    "MasterToMasterIngress" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "MasterSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "5050",
+        "ToPort" : "5050",
+        "SourceSecurityGroupId" : { "Ref" : "MasterSecurityGroup" }
+      }
+    },
+
+    "LbSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Mesos Master LB",
         "VpcId" : { "Ref" : "VpcId" }
       }
     },
 
-    "SecurityGroupIngress": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": {
-        "GroupId": { "Ref": "SecurityGroup" },
-        "IpProtocol": "-1",
-        "FromPort": "0",
-        "ToPort": "65535",
-        "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
+    "ElasticLoadBalancer" : {
+      "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties" : {
+        "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }],
+        "Subnets": { "Ref": "Subnets" },
+        "Listeners" : [
+          {
+            "LoadBalancerPort" : "5050",
+            "Protocol" : "HTTP",
+            "InstancePort" : "5050",
+            "InstanceProtocol" : "HTTP"
+          },
+          {
+            "LoadBalancerPort" : "8080",
+            "Protocol" : "HTTP",
+            "InstancePort" : "8080",
+            "InstanceProtocol" : "HTTP"
+          }],
+        "HealthCheck" : {
+          "Target" : "HTTP:5050/health",
+          "HealthyThreshold" : "2",
+          "UnhealthyThreshold" : "2",
+          "Interval" : "30",
+          "Timeout" : "5"
         }
-    },
-
-    "WaitHandle" : {
-      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+      }
     }
   },
 
   "Outputs" : {
     "MesosMasterSecurityGroup" : {
-      "Value" : { "Ref" : "SecurityGroup" }
+      "Value" : { "Ref" : "MasterSecurityGroup" }
+    },
+    "MasterElbAddress" : {
+      "Description" : "Mesos Master",
+      "Value" : { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}
     }
   }
 }
