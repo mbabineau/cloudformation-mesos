@@ -134,28 +134,28 @@
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-aeb598c6"
+        "AMI" : "ami-9effd3f6"
       },
       "us-west-1" : {
-        "AMI" : "ami-5b18fe1f"
+        "AMI" : "ami-b9799ffd"
       },
       "us-west-2" : {
-        "AMI" : "ami-2b3e121b"
+        "AMI" : "ami-3fe5c90f"
       },
       "eu-west-1" : {
-        "AMI" : "ami-1d31ae6a"
+        "AMI" : "ami-df9a04a8"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-40c5f412"
+        "AMI" : "ami-a8bf8efa"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-a781f19d"
+        "AMI" : "ami-25f7871f"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-fb3fc8fb"
+        "AMI" : "ami-7f48bf7f"
       },
       "sa-east-1" : {
-        "AMI" : "ami-812d959c"
+        "AMI" : "ami-c311a9de"
       }
     }
   },

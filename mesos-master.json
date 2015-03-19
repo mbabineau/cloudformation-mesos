@@ -139,6 +139,7 @@
         "MinSize" : { "Ref" : "ClusterSize" },
         "MaxSize" : { "Ref" : "ClusterSize" },
         "DesiredCapacity" : { "Ref" : "ClusterSize" },
+        "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ],
         "VPCZoneIdentifier" : { "Ref" : "Subnets" },
         "Tags" : [
           {
