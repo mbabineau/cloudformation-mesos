@@ -131,7 +131,7 @@
         "AvailabilityZones" : {
           "Fn::If" : [
             "UseAllAvailabilityZones",
-            { "Fn::GetAZs": "" },
+            { "Fn::GetAZs": "AWS::Region" },
             {"Ref" : "AvailabilityZones"}
           ]
         },
