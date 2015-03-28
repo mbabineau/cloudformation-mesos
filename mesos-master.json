@@ -98,7 +98,7 @@
 
   "Conditions" : {
     "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
-    "UseAllAvailabilityZones" : {"Fn::Equals" : [{ "Fn::Join" : ["", {"Ref" : "AvailabilityZones"} ]}, ""]}
+    "UseAllAvailabilityZones" : { "Fn::Equals" : [{ "Fn::Join" : ["", { "Ref" : "AvailabilityZones"} ]}, ""]}
   },
 
   "Resources" : {
@@ -139,7 +139,7 @@
         "MinSize" : { "Ref" : "ClusterSize" },
         "MaxSize" : { "Ref" : "ClusterSize" },
         "DesiredCapacity" : { "Ref" : "ClusterSize" },
-        "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ],
+        "LoadBalancerNames" : [ { "Ref" : "PublicElb" }, { "Ref" : "PrivateElb" } ],
         "VPCZoneIdentifier" : { "Ref" : "Subnets" },
         "Tags" : [
           {
@@ -339,7 +339,7 @@
       }
     },
 
-    "ElasticLoadBalancer" : {
+    "PublicElb" : {
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties" : {
         "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }],
@@ -356,7 +356,38 @@
             "Protocol" : "HTTP",
             "InstancePort" : "8080",
             "InstanceProtocol" : "HTTP"
-          }],
+          }
+        ],
+        "HealthCheck" : {
+          "Target" : "HTTP:5050/health",
+          "HealthyThreshold" : "2",
+          "UnhealthyThreshold" : "2",
+          "Interval" : "30",
+          "Timeout" : "5"
+        }
+      }
+    },
+
+    "PrivateElb" : {
+      "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties" : {
+        "Scheme" : "internal",
+        "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }, { "Ref" : "MasterSecurityGroup" }],
+        "Subnets": { "Ref": "Subnets" },
+        "Listeners" : [
+          {
+            "LoadBalancerPort" : "5050",
+            "Protocol" : "HTTP",
+            "InstancePort" : "5050",
+            "InstanceProtocol" : "HTTP"
+          },
+          {
+            "LoadBalancerPort" : "8080",
+            "Protocol" : "HTTP",
+            "InstancePort" : "8080",
+            "InstanceProtocol" : "HTTP"
+          }
+        ],
         "HealthCheck" : {
           "Target" : "HTTP:5050/health",
           "HealthyThreshold" : "2",
@@ -366,15 +397,20 @@
         }
       }
     }
+
   },
 
   "Outputs" : {
     "MesosMasterSecurityGroup" : {
       "Value" : { "Ref" : "MasterSecurityGroup" }
     },
-    "MasterElbAddress" : {
-      "Description" : "Mesos Master",
-      "Value" : { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}
+    "PublicElbAddress" : {
+      "Description" : "Mesos Master public ELB",
+      "Value" : { "Fn::GetAtt" : [ "PublicElb", "DNSName" ]}
+    },
+    "PrivateElbAddress" : {
+      "Description" : "Mesos Master private ELB",
+      "Value" : { "Fn::GetAtt" : [ "PublicElb", "DNSName" ]}
     }
   }
 }
