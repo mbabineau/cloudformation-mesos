@@ -1,7 +1,7 @@
 CloudFormation templates for a [Mesos](http://mesos.apache.org) cluster running the [Marathon](https://github.com/mesosphere/marathon) framework.
 
 Prerequisites:
-* An Exhibitor-managed ZooKeeper cluster such as provided by [thefactory/cloudformation-zookeeper](https://github.com/thefactory/cloudformation-zookeeper). Specifically, you'll need:
+* An Exhibitor-managed ZooKeeper cluster such as provided by [mbabineau/cloudformation-zookeeper](https://github.com/mbabineau/cloudformation-zookeeper). Specifically, you'll need:
     - An Exhibitor endpoint for ZK node discovery
     - A ZK client security group to associate with the Mesos nodes
 
@@ -40,7 +40,7 @@ Inbound rules are at your discretion, but you may want to include access to:
 * `8080 [tcp]` - Marathon port
 
 ### 3. Set up ZooKeeper
-You can use the instructions and template at [thefactory/cloudformation-zookeeper](https://github.com/thefactory/cloudformation-zookeeper), or you can use an existing cluster.
+You can use the instructions and template at [mbabineau/cloudformation-zookeeper](https://github.com/mbabineau/cloudformation-zookeeper), or you can use an existing cluster.
 
 We'll need two things:
 * `ExhibitorDiscoveryUrl` - a URL that returns a list of active ZK nodes. The expected format is that of Exhibitor's `/cluster/list` call. Example response:
@@ -91,8 +91,10 @@ aws cloudformation create-stack \
 ```
 
 ### 4. Watch the cluster converge
-Once the stack has been provisioned, visit `http://<host>:5050/` (for Mesos) on one of the master nodes. You will need to do this from a location granted access by the specified `AdminSecurityGroup`.
+Once the stack has been provisioned, visit the public-facing ELB created by the stack. You can find the DNS address by checking the stack's `Outputs`.
 
-_Note the Docker image for Marathon may take several minutes to retrieve. This can be improved with the use of a private Docker registry._
+The ELB exposes two endpoints:
+* `http://<public-elb>:5050/` for Mesos
+* `http://<public-elb>:8080/` for Marathon
 
-You should see the Mesos management UI with the state of the cluster. Once you see slaves listed, you can begin running apps through Marathon at `http://<host>:8080/` on the same server.
+_Note: You will need to do this from a location granted access by the specified `AdminSecurityGroup`_
