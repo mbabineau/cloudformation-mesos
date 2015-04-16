@@ -166,13 +166,6 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Metadata" : {
-        "AWS::CloudFormation::Authentication" : {
-          "S3AccessCreds" : {
-            "type" : "S3",
-            "accessKeyId" : { "Ref" : "HostKeys" },
-            "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}
-          }
-        },
         "AWS::CloudFormation::Init" : {
           "config": {
             "packages" : {
