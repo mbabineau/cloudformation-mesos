@@ -26,7 +26,7 @@
     },
     "KeyName" : {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
-      "Type" : "String"
+      "Type" : "AWS::EC2::KeyPair::KeyName"
     },
     "ClusterId" : {
       "Description" : "Mesos cluster ID",
@@ -46,11 +46,11 @@
     },
     "ZkClientSecurityGroup" : {
       "Description" : "Security group ID for ZK clients (should grant access to ZK nodes)",
-      "Type" : "String"
+      "Type" : "AWS::EC2::SecurityGroup::Id"
     },
     "AdminSecurityGroup" : {
       "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
-      "Type" : "String"
+      "Type" : "AWS::EC2::SecurityGroup::Id"
     },
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
@@ -84,11 +84,11 @@
     },
     "Subnets" : {
       "Description" : "List of VPC subnet IDs for the cluster. Must match the passed AvailabilityZones.",
-      "Type" : "CommaDelimitedList"
+      "Type" : "List<AWS::EC2::Subnet::Id>"
     },
     "VpcId" : {
       "Description" : "VPC associated with the provided subnets",
-      "Type" : "String"
+      "Type" : "AWS::EC2::VPC::Id"
     },
     "AvailabilityZones": {
       "Description" : "(Optional) If passed, only launch nodes in these AZs (e.g., 'us-east-1a,us-east-1b'). Must match the passed Subnets.",
