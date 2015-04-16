@@ -84,6 +84,11 @@
       "Description" : "(Optional) If passed, only launch nodes in these AZs (e.g., 'us-east-1a,us-east-1b'). Must match the passed Subnets.",
       "Type" : "CommaDelimitedList",
       "Default" : ""
+    },
+    "StackCreationTimeout" : {
+      "Description" : "Timeout on initial stack creation",
+      "Type" : "String",
+      "Default": "PT10M"
     }
   },
 
@@ -139,6 +144,11 @@
             "PropagateAtLaunch" : "true"
           }
         ]
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : { "Ref" : "StackCreationTimeout" }
+        }
       }
     },
 
@@ -228,7 +238,10 @@
           "# Helper function\n",
           "function error_exit\n",
           "{\n",
-          "  cfn-signal -e 1 -r \"$1\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "  cfn-signal -e 1 -r \"$1\" ",
+              " --resource ServerGroup",
+              " --stack ", { "Ref" : "AWS::StackName" },
+              " --region ", { "Ref" : "AWS::Region" }, "\n",
           "  exit 1\n",
           "}\n",
 
@@ -281,7 +294,10 @@
           ]},
 
           "# All is well so signal success\n",
-          "cfn-signal -e 0 -r \"Stack setup complete\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "cfn-signal -e 0 -r \"Stack setup complete\" ",
+              " --resource ServerGroup",
+              " --stack ", { "Ref" : "AWS::StackName" },
+              " --region ", { "Ref" : "AWS::Region" }, "\n",
 
           "#EOF"
         ]]}}
@@ -307,10 +323,6 @@
         "ToPort": "65535",
         "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
         }
-    },
-
-    "WaitHandle" : {
-      "Type" : "AWS::CloudFormation::WaitConditionHandle"
     }
   }
 }
