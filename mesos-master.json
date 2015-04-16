@@ -252,7 +252,7 @@
               " --stack ", { "Ref" : "AWS::StackName" },
               " --region ", { "Ref" : "AWS::Region" }, "\n",
           "  exit 1\n",
-          "}\n",        
+          "}\n",
 
           "# Process CloudFormation init definitions\n",
           "cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r LaunchConfig ",

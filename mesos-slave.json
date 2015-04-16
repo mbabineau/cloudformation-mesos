@@ -45,8 +45,9 @@
       "Type" : "AWS::EC2::SecurityGroup::Id"
     },
     "MesosMasterSecurityGroup" : {
-      "Description" : "Security group ID of Mesos Master nodes",
+      "Description" : "Security group ID of Mesos Master nodes. If not passed, you'll need to grant network access on your own",
       "Type" : "AWS::EC2::SecurityGroup::Id"
+      ""
     },
     "DockerCredentials" : {
       "Description" : "JSON string to be saved as .dockercfg",
@@ -95,7 +96,8 @@
   "Conditions" : {
     "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
     "EnableConfigScript" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "ConfigScriptS3Location" }, ""] }] },
-    "UseAllAvailabilityZones" : {"Fn::Equals" : [{ "Fn::Join" : ["", {"Ref" : "AvailabilityZones"} ]}, ""]}
+    "UseAllAvailabilityZones" : {"Fn::Equals" : [{ "Fn::Join" : ["", {"Ref" : "AvailabilityZones"} ]}, ""]},
+    "GrantNetworkAccess" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "MesosMasterSecurityGroup"}, ""]}]}
   },
 
   "Resources" : {
@@ -307,22 +309,32 @@
     "SecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-        "GroupDescription" : "Enable SSH, Mesos, and Marathon access",
-        "VpcId" : { "Ref" : "VpcId" },
-        "SecurityGroupIngress" :
-          [ { "IpProtocol" : "tcp", "FromPort" : "5051", "ToPort" : "5051", "SourceSecurityGroupId" : { "Ref" : "MesosMasterSecurityGroup"} } ]
+        "GroupDescription" : "Mesos Slaves",
+        "VpcId" : { "Ref" : "VpcId" }
+    },
+
+    "MasterToSlaveIngress" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Condition" : "GrantNetworkAccess",
+      "Properties" : {
+        "GroupId" : { "Ref" : "SecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "5051",
+        "ToPort" : "5051",
+        "SourceSecurityGroupId" : { "Ref" : "MesosMasterSecurityGroup" }
       }
     },
 
-    "MesosMasterSecurityGroupIngress": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": {
-        "GroupId": { "Ref": "MesosMasterSecurityGroup" },
-        "IpProtocol": "-1",
-        "FromPort": "0",
-        "ToPort": "65535",
-        "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
-        }
+    "SlaveToMasterIngress" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Condition" : "GrantNetworkAccess",
+      "Properties" : {
+        "GroupId" : { "Ref" : "MesosMasterSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "5050",
+        "ToPort" : "5050",
+        "SourceSecurityGroupId" : { "Ref" : "SecurityGroup" }
+      }
     }
   }
 }
