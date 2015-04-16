@@ -71,8 +71,13 @@
       "Type" : "String",
       "Default" : ""
     },
-    "MasterConfigScriptS3Location" : {
-      "Description" : "(optional) S3 location of an executable to download and run after other boot-time provisioning (e.g., \"s3://mybucket/myscript.sh\").",
+    "MasterConfigScriptS3Bucket" : {
+      "Description" : "(optional) S3 bucket of an executable to download and run after other boot-time provisioning (e.g., \"my-bucket\").",
+      "Type" : "String",
+      "Default" : ""
+    },
+    "MasterConfigScriptS3Path" : {
+      "Description" : "(optional) Path within ConfigScriptS3Bucket of an executable to download and run after other boot-time provisioning (e.g., \"/path/to/script\").",
       "Type" : "String",
       "Default" : ""
     },
@@ -102,8 +107,13 @@
       "Type" : "String",
       "Default" : ""
     },
-    "SlaveConfigScriptS3Location" : {
-      "Description" : "(optional) S3 location of an executable to download and run after other boot-time provisioning (e.g., \"s3://mybucket/myscript.sh\").",
+    "SlaveConfigScriptS3Bucket" : {
+      "Description" : "(optional) S3 bucket of an executable to download and run after other boot-time provisioning (e.g., \"my-bucket\").",
+      "Type" : "String",
+      "Default" : ""
+    },
+    "SlaveConfigScriptS3Path" : {
+      "Description" : "(optional) Path within ConfigScriptS3Bucket of an executable to download and run after other boot-time provisioning (e.g., \"/path/to/script\").",
       "Type" : "String",
       "Default" : ""
     },
@@ -190,7 +200,8 @@
           "QuorumSize" : { "Ref" : "MasterQuorumCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "MasterLogstashConfig" },
-          "ConfigScriptS3Location" : { "Ref" : "MasterConfigScriptS3Location" },
+          "ConfigScriptS3Bucket" : { "Ref" : "MasterConfigScriptS3Bucket" },
+          "ConfigScriptS3Path" : { "Ref" : "MasterConfigScriptS3Path" },
           "MarathonDockerImage" : { "Ref" : "MarathonDockerImage" },
           "MarathonLoggerDockerImage" : { "Ref" : "MarathonLoggerDockerImage" },
           "MarathonLoggerEventStore" : { "Ref" : "MarathonLoggerEventStore" },
@@ -218,7 +229,8 @@
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "SlaveLogstashConfig" },
-          "ConfigScriptS3Location" : { "Ref" : "SlaveConfigScriptS3Location" },
+          "ConfigScriptS3Bucket" : { "Ref" : "SlaveConfigScriptS3Bucket" },
+          "ConfigScriptS3Path" : { "Ref" : "SlaveConfigScriptS3Path" },
           "MesosResources" : { "Ref" : "SlaveResources" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },
