@@ -46,11 +46,13 @@
       "Type" : "String",
       "Default" : "t2.micro",
       "AllowedValues" : [
-        "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
-        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "t2.micro", "t2.small", "t2.medium",
+        "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge",
+        "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
         "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge",
-        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hs1.8xlarge",
-        "g2.2xlarge"
+        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hs1.8xlarge", "g2.2xlarge"
       ],
       "ConstraintDescription" : "must be a valid, HVM-compatible EC2 instance type."
     },
@@ -69,17 +71,24 @@
       "Type" : "String",
       "Default" : ""
     },
+    "MasterConfigScriptS3Location" : {
+      "Description" : "(optional) S3 location of an executable to download and run after other boot-time provisioning (e.g., \"s3://mybucket/myscript.sh\").",
+      "Type" : "String",
+      "Default" : ""
+    },
 
     "SlaveInstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
       "Default" : "t2.micro",
       "AllowedValues" : [
-        "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
-        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "t2.micro", "t2.small", "t2.medium",
+        "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge",
         "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge",
-        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hs1.8xlarge",
-        "g2.2xlarge"
+        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hs1.8xlarge", "g2.2xlarge"
       ],
       "ConstraintDescription" : "must be a valid, HVM-compatible EC2 instance type."
     },
@@ -90,6 +99,11 @@
     },
     "SlaveLogstashConfig" : {
       "Description" : "(optional) Config string for Logstash on the Mesos Slaves (to read task logs, you can use 'input { file { path => \"/tmp/mesos/slaves/*/frameworks/*/executors/*/runs/latest/stdout\" }')",
+      "Type" : "String",
+      "Default" : ""
+    },
+    "SlaveConfigScriptS3Location" : {
+      "Description" : "(optional) S3 location of an executable to download and run after other boot-time provisioning (e.g., \"s3://mybucket/myscript.sh\").",
       "Type" : "String",
       "Default" : ""
     },
@@ -176,6 +190,7 @@
           "QuorumSize" : { "Ref" : "MasterQuorumCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "MasterLogstashConfig" },
+          "ConfigScriptS3Location" : { "Ref" : "MasterConfigScriptS3Location" },
           "MarathonDockerImage" : { "Ref" : "MarathonDockerImage" },
           "MarathonLoggerDockerImage" : { "Ref" : "MarathonLoggerDockerImage" },
           "MarathonLoggerEventStore" : { "Ref" : "MarathonLoggerEventStore" },
@@ -203,6 +218,7 @@
           "ClusterSize" : { "Ref" : "SlaveInstanceCount" },
           "DockerCredentials" : { "Ref" : "DockerCredentials" },
           "LogstashConfig" : { "Ref" : "SlaveLogstashConfig" },
+          "ConfigScriptS3Location" : { "Ref" : "SlaveConfigScriptS3Location" },
           "MesosResources" : { "Ref" : "SlaveResources" },
           "ExhibitorDiscoveryUrl" : { "Ref" : "ExhibitorDiscoveryUrl" },
           "ZkClientSecurityGroup" : { "Ref" : "ZkClientSecurityGroup" },

@@ -14,11 +14,13 @@
       "Type" : "String",
       "Default" : "t2.micro",
       "AllowedValues" : [
-        "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
-        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "t2.micro", "t2.small", "t2.medium",
+        "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge",
+        "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge",
         "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge",
-        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hs1.8xlarge",
-        "g2.2xlarge"
+        "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hs1.8xlarge", "g2.2xlarge"
       ],
       "ConstraintDescription" : "must be a valid, HVM-compatible EC2 instance type."
     },
@@ -48,7 +50,7 @@
     },
     "AdminSecurityGroup" : {
       "Description" : "Existing security group that should be granted administrative access to Mesos (e.g., 'sg-123456')",
-      "Type": "String"
+      "Type" : "String"
     },
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
@@ -75,6 +77,11 @@
       "Type" : "String",
       "Default" : ""
     },
+    "ConfigScriptS3Location" : {
+      "Description" : "(optional) S3 location of an executable to download and run after other boot-time provisioning (e.g., \"s3://mybucket/myscript.sh\").",
+      "Type" : "String",
+      "Default" : ""
+    },
     "Subnets" : {
       "Description" : "List of VPC subnet IDs for the cluster. Must match the passed AvailabilityZones.",
       "Type" : "CommaDelimitedList"
@@ -88,7 +95,6 @@
       "Type" : "CommaDelimitedList",
       "Default" : ""
     },
-
     "StackCreationTimeout" : {
       "Description" : "Timeout on initial stack creation",
       "Type" : "String",
@@ -98,6 +104,7 @@
 
   "Conditions" : {
     "EnableLogstashCondition" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "LogstashConfig" }, ""] }] },
+    "EnableConfigScript" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "ConfigScriptS3Location" }, ""] }] },
     "UseAllAvailabilityZones" : { "Fn::Equals" : [{ "Fn::Join" : ["", { "Ref" : "AvailabilityZones"} ]}, ""]}
   },
 
@@ -159,10 +166,21 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Metadata" : {
+        "AWS::CloudFormation::Authentication" : {
+          "S3AccessCreds" : {
+            "type" : "S3",
+            "accessKeyId" : { "Ref" : "HostKeys" },
+            "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}
+          }
+        },
         "AWS::CloudFormation::Init" : {
           "config": {
+            "packages" : {
+              "python": {
+                "awscli": []
+              }
+            },
             "files" : {
-
               "/usr/local/bin/zk-list-nodes" : {
                 "content" : { "Fn::Join" : ["", [
                   "#!/bin/bash -e\n",
@@ -220,7 +238,6 @@
                 "owner"   : "root",
                 "group"   : "root"
               }
-
             }
           }
         }
@@ -296,6 +313,19 @@
           "     --callback-url http://localhost:5000/events",
           "     --event-store ", { "Ref": "MarathonLoggerEventStore" }, "'\n",
           "runit-service enable marathon-logger\n",
+
+          { "Fn::If" : [
+            "EnableConfigScript",
+            { "Fn::Join" : ["", [
+              "# Download and run the user-provided config script \n",
+              "export AWS_ACCESS_KEY_ID=", { "Ref" : "HostKeys" }, "\n",
+              "export AWS_SECRET_ACCESS_KEY=", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}, "\n",
+              "aws --region ", { "Ref" : "AWS::Region" }, " s3 cp ", { "Ref" : "ConfigScriptS3Location" }, " /tmp/cfn-user-config\n",
+              "chmod +x /tmp/cfn-user-config\n",
+              "/tmp/cfn-user-config || error_exit \n"
+            ]]},
+            ""
+          ]},
 
           "# All is well so signal success\n",
           "cfn-signal -e 0 -r \"Stack setup complete\" ",
