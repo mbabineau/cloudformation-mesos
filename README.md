@@ -8,21 +8,21 @@ Prerequisites:
 ## Overview
 
 This project includes three templates:
-* `mesos-master.json` - Launch a set of Mesos masters running Marathon in an auto scaling group
-* `mesos-slave.json` - Launch a set of Mesos slaves in an auto scaling group
+* `mesos-master.json` - Launch a set of Mesos Masters running Marathon in an auto scaling group
+* `mesos-slave.json` - Launch a set of Mesos Slaves in an auto scaling group
 * `mesos.json` - Creates both a `mesos-master` and `mesos-slave` stack from the corresponding templates.
 
 In general, you'll want to launch the Mesos cluster via `mesos.json`.
 
-Mesos servers are launched from public AMIs running Ubuntu 14.04 LTS and pre-loaded with Docker, Runit, and Mesos. If you wish to use your own image, simply modify `RegionMap` in `mesos.json`.
+The servers are launched from public AMIs running Ubuntu 14.04 LTS and pre-loaded with Docker, Runit, and Mesos. See `packer/ubuntu-14.04-mesos.json` for build details. If you wish to use your own AMI, simply pass `MasterInstanceAmi` and/or `SlaveInstanceAmi` to `mesos.json`.
 
 Marathon is run on the masters via a Docker image specified as a Parameter. You can use the default or provide your own.
 
-To adjust cluster capacity, simply increment or decrement the slave auto scaling group. You can do the same for the masters. Node addition/removal should be handled transparently by Mesos.
+To adjust cluster capacity, simply increment or decrement `SlaveInstanceCount`. You can do the same for the masters with `MasterInstanceCount`, but update `MasterQuorumCount` accordingly. CloudFormation will update the auto scaling groups, and the node addition/removal should be handled transparently by Mesos.
 
 Mesos uses ZooKeeper for coordination, so the templates expect a security group (granting ZK access) and a ZK node discovery URL (exposed by Exhibitor) to be passed in.
 
-Note that this template must be used with Amazon VPC. New AWS accounts automatically use VPC, but if you have an old account and are still using EC2-Classic, you'll need to modify this template or make the switch.
+Note that this template must be used with Amazon VPC. New AWS accounts automatically use VPC, but if you have an old account and are still using EC2-Classic, you'll need to modify this template or (recommended) make the switch.
 
 ## Usage
 
@@ -90,11 +90,11 @@ aws cloudformation create-stack \
         ParameterKey=MesosSlaveTemplateUrl,ParameterValue=<url>
 ```
 
-### 4. Watch the cluster converge
+### 4. Access the cluster
 Once the stack has been provisioned, visit the public-facing ELB created by the stack. You can find the DNS address by checking the stack's `Outputs`.
 
 The ELB exposes two endpoints:
 * `http://<public-elb>:5050/` for Mesos
 * `http://<public-elb>:8080/` for Marathon
 
-_Note: You will need to do this from a location granted access by the specified `AdminSecurityGroup`_
+_Note: You will need to do this from a location with access granted by `AdminSecurityGroup`_

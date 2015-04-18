@@ -1,0 +1,77 @@
+#!/bin/bash -e
+
+# Helper script for managing runit services
+
+function create() {
+	USAGE="$0 create <service_name> <cmd> [<options>]"
+	service_name=$1
+	cmd=${@:2}
+
+	: ${service_name:?"must be passed. $USAGE"}
+	: ${cmd:?"must be passed. $USAGE"}
+
+	svdir=/etc/sv/${service_name}
+
+	sudo mkdir -p ${svdir}/env
+	cat <<- EOF | sudo tee ${svdir}/run > /dev/null
+		#!/bin/sh
+		exec 2>&1
+		exec chpst -e ${svdir}/env ${cmd} ${opts}
+	EOF
+	sudo chmod 774 ${svdir}/run
+
+	sudo mkdir -p /var/log/${service_name} ${svdir}/log
+	cat <<- EOF | sudo tee ${svdir}/log/run > /dev/null
+		#!/bin/sh
+		exec chpst svlogd -tt /var/log/${service_name}
+	EOF
+	sudo chmod 774 ${svdir}/log/run
+
+	sudo mkdir -p /etc/service
+	echo "${service_name} created"
+}
+
+function enable() {
+	USAGE="$0 enable <service_name>"
+	service_name=$1
+
+	: ${service_name:?"must be passed. $USAGE"}
+	
+	sudo ln -fs /etc/sv/${service_name} /etc/service/
+	sudo ln -fs /usr/bin/sv /etc/init.d/${service_name}
+
+	echo "${service_name} enabled"
+}
+
+function disable() {
+	USAGE="$0 disable <service_name>"
+	service_name=$1
+
+	: ${service_name:?"must be passed. $USAGE"}
+
+	sudo rm -f /etc/service/${service_name}
+	sudo rm -f /etc/init.d/${service_name}
+
+	echo "${service_name} disabled"
+}
+
+case "$1" in
+	create)
+		shift
+		create $@
+		;;
+
+	enable)
+		shift
+		enable $@
+		;;
+
+	disable)
+		shift
+		disable $@
+		;;
+
+	*)
+		echo "Usage: $0 {create|enable|disable} <service_name> [<args>]"
+		exit 1
+esac

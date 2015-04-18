@@ -1,0 +1,108 @@
+{
+  "variables": {
+    "docker_version": "1.5.0",
+    "mesos_version": "0.21.1",
+    "mesos_pkg_url": "http://downloads.mesosphere.io/master/ubuntu/14.04/mesos_0.21.1-1.1.ubuntu1404_amd64.deb",
+    "mesos_egg_url": "http://downloads.mesosphere.io/master/ubuntu/14.04/mesos-0.21.1-py2.7-linux-x86_64.egg",
+    "cfn_tools_url": "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
+    "ami_prefix": null
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-west-1",
+      "source_ami": "ami-f96182bd",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "{{user `ami_prefix`}}-mesos-{{user `mesos_version`}}-hvm-{{isotime | clean_ami_name}}",
+      "ami_description": "Ubuntu 14.04 LTS with Docker, Runit, and Mesos",
+      "ami_regions": ["us-east-1", "us-west-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "sa-east-1", "eu-west-1"],
+      "ami_groups": "all",
+      "tags": {
+        "os:distribution": "Ubuntu",
+        "os:release": "14.04 LTS",
+        "mesos:version": "{{user `mesos_version`}}"
+      }
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "include/",
+      "destination": "/tmp/"
+    },
+
+    {
+      "type": "shell",
+      "inline": [
+        "# Wait before running the update. If we're too quick, we'll only get a partial package list",
+        "sleep 10",
+        "sudo apt-get update",
+        "sudo apt-get -y install python-setuptools ntp wget curl default-jre libsvn1 unzip",
+        "sudo easy_install pip",
+
+        "# Set a TTL for JVM DNS cache",
+        "sudo sh -c \"grep '^networkaddress.cache.ttl=' /etc/java-7-openjdk/security/java.security || echo 'networkaddress.cache.ttl=60' >> /etc/java-7-openjdk/security/java.security\"",
+
+        "# Put system configs into place",
+        "sudo mv /tmp/limits.conf /etc/security/limits.conf",
+        "sudo mv /tmp/sysctld.network.conf /etc/sysctl.d/60-network.conf",
+        "sudo mv /tmp/pamd.common-session /etc/pam.d/common-session",
+        "sudo mv /tmp/pamd.common-session-noninteractive /etc/pam.d/common-session-noninteractive",
+
+        "# Docker (use Docker repo so we can get recent versions)",
+        "sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9",
+        "sudo sh -c 'echo deb http://get.docker.com/ubuntu docker main > /etc/apt/sources.list.d/docker.list'",
+        "sudo apt-get update",
+        "sudo apt-get -y install lxc-docker-{{user `docker_version`}}",
+        "sudo mv /tmp/docker.logrotate /etc/logrotate.d/docker",
+
+        "# Install logstash",
+        "sudo curl -o /tmp/logstash.tar.gz https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz",
+        "sudo mkdir /opt/logstash",
+        "sudo tar zxf /tmp/logstash.tar.gz -C /opt/logstash --strip=1",
+        "sudo rm -f /tmp/logstash.tgz",
+        "sudo /opt/logstash/bin/plugin install contrib",
+
+        "# Install runit",
+        "sudo apt-get -y install runit",
+        "sudo mv /tmp/runit-service /usr/local/bin/runit-service",
+        "sudo chmod +x /usr/local/bin/runit-service",
+
+        "# Install Mesos from package",
+        "sudo wget -q -O /tmp/mesos.deb {{user `mesos_pkg_url`}}",
+        "sudo dpkg -i /tmp/mesos.deb",
+        "sudo rm /tmp/mesos.deb",
+
+        "# Switch from package-provided Mesos init scripts to our own",
+        "sudo update-rc.d mesos-master disable",
+        "sudo update-rc.d mesos-slave disable",
+        "sudo rm /etc/init.d/mesos-master /etc/init/mesos-master.conf",
+        "sudo rm /etc/init.d/mesos-slave /etc/init/mesos-slave.conf",
+        "runit-service create mesos-master /usr/sbin/mesos-master --log_dir=/var/log/mesos --work_dir=/var/lib/mesos",
+        "runit-service create mesos-slave /usr/sbin/mesos-slave --log_dir=/var/log/mesos --containerizers=docker,mesos",
+        "sudo sh -c 'echo \"/usr/lib/jvm/default-java/jre/lib/amd64:/usr/lib/jvm/default-java/jre/lib/amd64/server\" > /etc/sv/mesos-master/env/LD_LIBRARY_PATH'",
+        "sudo sh -c 'echo \"/usr/lib/jvm/default-java/jre/lib/amd64:/usr/lib/jvm/default-java/jre/lib/amd64/server\" > /etc/sv/mesos-slave/env/LD_LIBRARY_PATH'",
+
+        "# Install Mesos Python bindings",
+        "sudo wget -q -O /tmp/mesos.egg {{user `mesos_egg_url`}}",
+        "sudo easy_install /tmp/mesos.egg",
+        "sudo rm /tmp/mesos.egg"
+      ]
+    },
+    {
+      "type": "shell",
+      "only": ["amazon-ebs"],
+      "inline": [
+        "# Install CloudFormation bootstrap tools",
+        "sudo wget -O /root/aws-cfn-bootstrap-latest.tar.gz {{user `cfn_tools_url`}}",
+        "sudo mkdir -p /root/aws-cfn-bootstrap-latest",
+        "sudo tar xvfz /root/aws-cfn-bootstrap-latest.tar.gz --strip-components=1 -C /root/aws-cfn-bootstrap-latest",
+        "sudo easy_install /root/aws-cfn-bootstrap-latest/",
+        "sudo rm -rf /root/aws-cfn-bootstrap-latest /root/aws-cfn-bootstrap-latest.tar.gz"
+      ]
+    }
+  ]
+}

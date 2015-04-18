@@ -41,6 +41,11 @@
       "Type" : "String"
     },
 
+    "MasterInstanceAmi" : {
+      "Description" : "(optional) AMI to use for Mesos Masters",
+      "Type" : "String",
+      "Default" : ""
+    },
     "MasterInstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
@@ -82,6 +87,11 @@
       "Default" : ""
     },
 
+    "SlaveInstanceAmi" : {
+      "Description" : "(optional) AMI to use for Mesos Slaves",
+      "Type" : "String",
+      "Default" : ""
+    },
     "SlaveInstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
@@ -152,34 +162,38 @@
       "Description" : "URL of the Mesos Slave CloudFormation template on S3 (must be \"https://s3.amazonaws.com/<bucket>/<key>\")",
       "Type" : "String"
     }
+  },
 
+  "Conditions" : {
+    "UseCustomMasterAmi" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "MasterInstanceAmi" }, ""] }] },
+    "UseCustomSlaveAmi" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "SlaveInstanceAmi" }, ""] }] }
   },
 
   "Mappings" : {
     "RegionMap" : {
       "us-east-1" : {
-        "AMI" : "ami-9effd3f6"
+        "AMI" : "ami-0a878262"
       },
       "us-west-1" : {
-        "AMI" : "ami-b9799ffd"
+        "AMI" : "ami-1d48aa59"
       },
       "us-west-2" : {
-        "AMI" : "ami-3fe5c90f"
+        "AMI" : "ami-734a7f43"
       },
       "eu-west-1" : {
-        "AMI" : "ami-df9a04a8"
+        "AMI" : "ami-99fc9cee"
       },
       "ap-southeast-1" : {
-        "AMI" : "ami-a8bf8efa"
+        "AMI" : "ami-50467b02"
       },
       "ap-southeast-2" : {
-        "AMI" : "ami-25f7871f"
+        "AMI" : "ami-79542943"
       },
       "ap-northeast-1" : {
-        "AMI" : "ami-7f48bf7f"
+        "AMI" : "ami-f26ca9f2"
       },
       "sa-east-1" : {
-        "AMI" : "ami-c311a9de"
+        "AMI" : "ami-3944c124"
       }
     }
   },
@@ -192,7 +206,11 @@
         "TemplateURL" : { "Ref" : "MesosMasterTemplateUrl" },
         "TimeoutInMinutes" : "15",
         "Parameters" : {
-          "InstanceAmi" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] },
+          "InstanceAmi" : { "Fn::If" : [
+            "UseCustomMasterAmi",
+            { "Ref" : "MasterInstanceAmi" },
+            { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] }
+          ]},
           "InstanceType" : { "Ref" : "MasterInstanceType" },
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },
@@ -222,7 +240,11 @@
         "TemplateURL" : { "Ref" : "MesosSlaveTemplateUrl" },
         "TimeoutInMinutes" : "15",
         "Parameters" : {
-          "InstanceAmi" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] },
+          "InstanceAmi" : { "Fn::If" : [
+            "UseCustomSlaveAmi",
+            { "Ref" : "SlaveInstanceAmi" },
+            { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] }
+          ]},
           "InstanceType" : { "Ref" : "SlaveInstanceType" },
           "KeyName" : { "Ref" : "KeyName" },
           "ClusterId" : { "Ref" : "ClusterId" },

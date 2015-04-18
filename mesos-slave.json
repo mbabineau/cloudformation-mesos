@@ -289,9 +289,6 @@
           "mkdir /mnt/mesos\n",
           "ln -s /mnt/mesos /tmp/mesos\n",
 
-          "# Install unzip\n",
-          "apt-get update && apt-get install -y unzip\n",
-
           { "Fn::If" : [
             "EnableLogstashCondition",
             { "Fn::Join" : ["", [
