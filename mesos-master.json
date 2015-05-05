@@ -379,6 +379,17 @@
       }
     },
 
+    "MarathonToMarathonIngress" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "MasterSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "8080",
+        "ToPort" : "8080",
+        "SourceSecurityGroupId" : { "Ref" : "MasterSecurityGroup" }
+      }
+    },
+
     "LbSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
