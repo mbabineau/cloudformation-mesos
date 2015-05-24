@@ -322,17 +322,6 @@
 
           "runit-service enable marathon\n",
 
-          "# Set up and run marathon-logger\n",
-          "docker pull ", { "Ref": "MarathonLoggerDockerImage" }, "\n",
-          "runit-service create marathon-logger 'docker -r=false run ",
-          "   --net=host",
-          "   -p 5000:5000",
-          "   ", { "Ref": "MarathonLoggerDockerImage" },
-          "     --marathon-url http://localhost:8080/",
-          "     --callback-url http://localhost:5000/events",
-          "     --event-store ", { "Ref": "MarathonLoggerEventStore" }, "'\n",
-          "runit-service enable marathon-logger\n",
-
           { "Fn::If" : [
             "EnableConfigScript",
             { "Fn::Join" : ["", [
