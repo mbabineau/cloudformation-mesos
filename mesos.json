@@ -141,7 +141,7 @@
     "MarathonDockerImage" : {
       "Description" : "The Marathon Docker image (format: 'registry:port/repository:version')",
       "Type" : "String",
-      "Default" : "mesosphere/marathon:v0.8.1"
+      "Default" : "mesosphere/marathon:v0.8.2-RC3"
     },
     "MarathonLoggerDockerImage" : {
       "Description" : "The marathon-logger Docker image (format: 'registry:port/repository:version')",
