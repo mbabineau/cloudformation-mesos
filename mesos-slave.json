@@ -91,6 +91,11 @@
       "Type" : "CommaDelimitedList",
       "Default" : ""
     },
+    "SlaveRootVolumeSize": {
+      "Description" : "(Optional) Set the size of the root EBS volume.",
+      "Type" : "Number",
+      "Default" : "8"
+    },
     "StackCreationTimeout" : {
       "Description" : "Timeout on initial stack creation",
       "Type" : "String",
@@ -262,9 +267,14 @@
         "AssociatePublicIpAddress": "true",
         "IamInstanceProfile" : { "Ref" : "SlaveInstanceProfile" },
         "InstanceType" : { "Ref" : "InstanceType" },
+        "BlockDeviceMappings": [{
+            "DeviceName": "/dev/sda1",
+            "Ebs" : {"VolumeSize": { "Ref" : "SlaveRootVolumeSize" }}
+        }],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -ex\n",
 
+          "resize2fs /dev/xvda1\n",
           "# Helper function\n",
           "function error_exit\n",
           "{\n",

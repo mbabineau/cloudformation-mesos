@@ -85,6 +85,11 @@
       "Description" : "(optional) Path within ConfigScriptS3Bucket of an executable to download and run after other boot-time provisioning (e.g., \"/path/to/script\").",
       "Type" : "String",
       "Default" : ""
+    },    
+    "MasterRootVolumeSize": {
+      "Description" : "(optional) Set the size (in GB) of the master root EBS volume.",
+      "Type" : "Number",
+      "Default" : "8"
     },
 
     "SlaveInstanceAmi" : {
@@ -131,6 +136,11 @@
       "Description" : "(optional) Resources to allocate to Mesos (as passed to --resources). To expose ports 8000-9000, for instance, you can use 'ports(*):[8000-9000, 31000-32000]'",
       "Type" : "String",
       "Default" : ""
+    },
+    "SlaveRootVolumeSize": {
+      "Description" : "(optional) Set the size (in GB) of the slave root EBS volume. Default is 8.",
+      "Type" : "Number",
+      "Default" : "8"
     },
 
     "DockerCredentials" : {
@@ -228,7 +238,8 @@
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
           "Subnets" : { "Ref" : "Subnets" },
           "VpcId" : { "Ref" : "VpcId" },
-          "AvailabilityZones" : { "Ref" : "AvailabilityZones" }
+          "AvailabilityZones" : { "Ref" : "AvailabilityZones" },
+          "MasterRootVolumeSize" : { "Ref" : "MasterRootVolumeSize" }
         }
       }
     },
@@ -260,7 +271,8 @@
           "AdminSecurityGroup" : { "Ref" : "AdminSecurityGroup" },
           "Subnets" : { "Ref" : "Subnets" },
           "VpcId" : { "Ref" : "VpcId" },
-          "AvailabilityZones" : { "Ref" : "AvailabilityZones" }
+          "AvailabilityZones" : { "Ref" : "AvailabilityZones" },
+          "SlaveRootVolumeSize" : { "Ref" : "SlaveRootVolumeSize" }
         }
       }
     }
