@@ -101,7 +101,7 @@
       "Default" : ""
     },
     "MasterRootVolumeSize": {
-      "Description" : "(Optional) Set the size of the root EBS volume.",
+      "Description" : "Set the size (in GB) of the root EBS volume.",
       "Type" : "Number",
       "Default" : "8"
     },
