@@ -12,7 +12,7 @@
     },
     "KeyName" : {
       "Description" : "Existing EC2 KeyPair to be associated with all cluster instances for SSH access. For default AMIs, log in as the 'ubuntu' user.",
-      "Type" : "String"
+      "Type" : "AWS::EC2::KeyPair::KeyName"
     },
     "Subnets" : {
       "Description" : "List of VPC subnet IDs in which to launch the cluster. Must match the passed AvailabilityZones.",
